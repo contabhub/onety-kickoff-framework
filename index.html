@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html class="scroll-smooth dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Onety — Framework de Kickoff | Turma 3</title>
+    <meta name="description" content="Framework de reunião de kickoff para implantação do módulo de Processos do Onety" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: '#050505',
+                        charcoal: '#111111',
+                        surface: '#1c1c1c',
+                        primary: '#ffffff',
+                        accent: '#1d7fe5',
+                        accentDark: '#0f4f9e',
+                        accentLight: '#4da3ff',
+                        danger: '#ff453a',
+                        success: '#00cc66',
+                        warning: '#ffaa00',
+                        info: '#38bdf8',
+                        muted: '#737373',
+                    },
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                        'shimmer': 'shimmer 1.5s infinite linear',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        shimmer: {
+                            from: { transform: 'translateX(-100%) skewX(-15deg)' },
+                            to: { transform: 'translateX(200%) skewX(-15deg)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 50vw;
+            height: 50vh;
+            background: radial-gradient(circle, rgba(29,127,229,0.06) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(60px);
+            animation: float 10s ease-in-out infinite alternate;
+        }
+
+        .ambient-glow-2 {
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 60vw;
+            height: 60vh;
+            background: radial-gradient(circle, rgba(77,163,255,0.04) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(80px);
+            animation: float 12s ease-in-out infinite alternate-reverse;
+        }
+
+        .glass-panel {
+            background: rgba(23, 23, 23, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(29,127,229,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px -10px rgba(29,127,229,0.15);
+        }
+
+        .flashlight-card {
+            position: relative;
+            background: rgba(20, 20, 20, 0.5);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .flashlight-card::before {
+            content: "";
+            position: absolute;
+            inset: 0px;
+            background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(29, 127, 229, 0.1), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .flashlight-card:hover::before { opacity: 1; }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+        .delay-300 { transition-delay: 0.3s; }
+        .delay-400 { transition-delay: 0.4s; }
+        .delay-500 { transition-delay: 0.5s; }
+
+        .bg-grid {
+            background-size: 50px 50px;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #1d7fe5;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #1d7fe5; }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, rgba(29,127,229,0.3), transparent);
+            transform: translateX(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .timeline-line { left: 24px; }
+        }
+
+        .checklist-item input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .checklist-item input[type="checkbox"]:checked {
+            background: #1d7fe5;
+            border-color: #1d7fe5;
+        }
+
+        .checklist-item input[type="checkbox"]:checked + span {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        .script-block {
+            border-left: 3px solid #1d7fe5;
+            background: rgba(29,127,229,0.05);
+        }
+
+        .progress-ring {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-grid">
+
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="max-w-[1400px] mx-auto border-x border-white/10 relative z-10 bg-obsidian/50 backdrop-blur-sm shadow-2xl">
+
+        <!-- NAVIGATION -->
+        <header class="relative z-50 border-b border-white/10 sticky top-0 glass-panel">
+            <div class="flex justify-between items-center px-4 md:px-12 py-4">
+                <div class="flex items-center gap-6">
+                    <a class="text-xs font-mono tracking-widest uppercase hover:text-accent transition-colors" href="#hero">Inicio</a>
+                    <a class="text-xs font-mono tracking-widest uppercase hover:text-accent transition-colors hidden md:block" href="#blocos">Blocos</a>
+                    <a class="text-xs font-mono tracking-widest uppercase hover:text-accent transition-colors hidden md:block" href="#checklist">Checklist</a>
+                </div>
+                <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+                    <iconify-icon class="text-2xl text-accent" icon="solar:rocket-bold-duotone"></iconify-icon>
+                    <span class="font-bold tracking-tighter text-lg">ONETY</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <a class="text-xs font-mono tracking-widest uppercase hover:text-accent transition-colors hidden md:block" href="#scripts">Scripts</a>
+                    <a class="text-xs font-mono tracking-widest uppercase hover:text-accent transition-colors hidden md:block" href="#metricas">Metricas</a>
+                    <a class="text-xs font-mono tracking-widest uppercase hover:text-accent transition-colors" href="#templates">Templates</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- HERO -->
+        <section id="hero" class="relative z-10 grid grid-cols-1 md:grid-cols-12 border-b border-white/10 min-h-[80vh]">
+            <div class="col-span-1 md:col-span-8 md:border-r border-white/10 relative overflow-hidden flex flex-col justify-center p-8 md:p-16">
+                <div class="absolute top-8 w-full flex justify-between px-8 items-center opacity-50 z-20">
+                    <span class="text-xs font-mono text-muted tracking-widest">FRAMEWORK v1.0</span>
+                    <span class="text-xs font-mono text-muted tracking-widest">TURMA 3</span>
+                </div>
+
+                <div class="relative z-20 mt-8">
+                    <span class="section-label mb-4 block reveal">Kickoff de Implantacao</span>
+                    <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.9] text-white reveal delay-100">
+                        Framework<br/>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accentLight">Reuniao</span><br/>
+                        60 min.
+                    </h1>
+
+                    <p class="mt-8 text-muted text-lg md:text-xl max-w-xl font-light reveal delay-300">
+                        Guia completo para levar cada escritorio da turma do "acabei de comprar" para "ja sei o que fazer e quando" em 60 minutos.
+                    </p>
+
+                    <div class="mt-10 flex flex-wrap items-center gap-4 reveal delay-400">
+                        <a href="#blocos" class="group relative z-10 flex items-center justify-center overflow-hidden rounded-full p-[1px]">
+                            <span class="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0_340deg,#1d7fe5_360deg)] opacity-70"></span>
+                            <span class="relative flex items-center rounded-full bg-charcoal py-3 px-6 ring-1 ring-white/10 transition-colors group-hover:bg-obsidian">
+                                <span class="font-mono text-xs uppercase tracking-widest text-white">Ver Blocos</span>
+                                <iconify-icon class="ml-3 text-accent text-lg transition-transform group-hover:translate-x-1" icon="solar:arrow-right-line-duotone"></iconify-icon>
+                            </span>
+                        </a>
+                        <a href="#checklist" class="text-xs font-mono uppercase tracking-widest text-muted hover:text-white transition-colors border-b border-transparent hover:border-white pb-1">Checklist do Facilitador</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-1 md:col-span-4 grid grid-rows-4">
+                <div class="flashlight-card border-b border-white/10 p-8 flex flex-col justify-between reveal delay-100 group" onmousemove="const r=this.getBoundingClientRect();this.style.setProperty('--mouse-x',`${event.clientX-r.left}px`);this.style.setProperty('--mouse-y',`${event.clientY-r.top}px`);">
+                    <iconify-icon class="text-2xl text-muted group-hover:text-accent transition-colors" icon="solar:clock-circle-bold-duotone"></iconify-icon>
+                    <div>
+                        <h2 class="text-3xl font-semibold tracking-tighter">60 min</h2>
+                        <span class="text-xs font-mono text-muted mt-1 block uppercase tracking-widest">Duracao Total</span>
+                    </div>
+                </div>
+                <div class="flashlight-card border-b border-white/10 p-8 flex flex-col justify-between reveal delay-200 group" onmousemove="const r=this.getBoundingClientRect();this.style.setProperty('--mouse-x',`${event.clientX-r.left}px`);this.style.setProperty('--mouse-y',`${event.clientY-r.top}px`);">
+                    <iconify-icon class="text-2xl text-muted group-hover:text-accent transition-colors" icon="solar:layers-bold-duotone"></iconify-icon>
+                    <div>
+                        <h2 class="text-3xl font-semibold tracking-tighter">5</h2>
+                        <span class="text-xs font-mono text-muted mt-1 block uppercase tracking-widest">Blocos</span>
+                    </div>
+                </div>
+                <div class="flashlight-card border-b border-white/10 p-8 flex flex-col justify-between reveal delay-300 group" onmousemove="const r=this.getBoundingClientRect();this.style.setProperty('--mouse-x',`${event.clientX-r.left}px`);this.style.setProperty('--mouse-y',`${event.clientY-r.top}px`);">
+                    <iconify-icon class="text-2xl text-muted group-hover:text-success transition-colors" icon="solar:target-bold-duotone"></iconify-icon>
+                    <div>
+                        <h2 class="text-3xl font-semibold tracking-tighter">7 dias</h2>
+                        <span class="text-xs font-mono text-muted mt-1 block uppercase tracking-widest">Time-to-Value</span>
+                    </div>
+                </div>
+                <div class="flashlight-card p-8 flex flex-col justify-between reveal delay-400 group" onmousemove="const r=this.getBoundingClientRect();this.style.setProperty('--mouse-x',`${event.clientX-r.left}px`);this.style.setProperty('--mouse-y',`${event.clientY-r.top}px`);">
+                    <iconify-icon class="text-2xl text-muted group-hover:text-warning transition-colors" icon="solar:users-group-rounded-bold-duotone"></iconify-icon>
+                    <div>
+                        <h2 class="text-3xl font-semibold tracking-tighter">SMB</h2>
+                        <span class="text-xs font-mono text-muted mt-1 block uppercase tracking-widest">Escritorios Contabeis</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SAIDA ESPERADA -->
+        <section class="border-b border-white/10 p-8 md:p-16">
+            <span class="section-label block mb-6 reveal">Saida Esperada</span>
+            <p class="text-muted mb-8 reveal delay-100">Cada participante sai da reuniao com:</p>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="glass-card rounded-xl p-6 text-center reveal delay-100">
+                    <iconify-icon class="text-3xl text-accent mb-3" icon="solar:login-3-bold-duotone"></iconify-icon>
+                    <p class="text-sm font-medium">Acesso configurado e primeiro login</p>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center reveal delay-200">
+                    <iconify-icon class="text-3xl text-accent mb-3" icon="solar:map-bold-duotone"></iconify-icon>
+                    <p class="text-sm font-medium">Clareza sobre as 5 fases</p>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center reveal delay-300">
+                    <iconify-icon class="text-3xl text-accent mb-3" icon="solar:star-bold-duotone"></iconify-icon>
+                    <p class="text-sm font-medium">Champions nomeados</p>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center reveal delay-400">
+                    <iconify-icon class="text-3xl text-accent mb-3" icon="solar:calendar-bold-duotone"></iconify-icon>
+                    <p class="text-sm font-medium">Agenda dos proximos 7 dias</p>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center reveal delay-500">
+                    <iconify-icon class="text-3xl text-accent mb-3" icon="solar:chat-round-dots-bold-duotone"></iconify-icon>
+                    <p class="text-sm font-medium">Canal de suporte ativo</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOCOS DA REUNIAO -->
+        <section id="blocos" class="border-b border-white/10">
+            <div class="p-8 md:p-16 pb-0">
+                <span class="section-label block mb-2 reveal">Estrutura da Reuniao</span>
+                <h2 class="text-4xl md:text-5xl font-bold tracking-tighter reveal delay-100">5 Blocos <span class="text-muted">/ 60 min</span></h2>
+            </div>
+
+            <!-- Bloco 1 -->
+            <div class="border-t border-white/10 mt-12 grid grid-cols-1 md:grid-cols-12 reveal">
+                <div class="md:col-span-3 p-8 md:p-12 border-b md:border-b-0 md:border-r border-white/10 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-mono text-accent tracking-widest">BLOCO 01</span>
+                        <h3 class="text-2xl font-bold tracking-tight mt-2">Abertura & Contexto</h3>
+                    </div>
+                    <div class="mt-6 flex items-center gap-3">
+                        <iconify-icon class="text-xl text-muted" icon="solar:clock-circle-linear"></iconify-icon>
+                        <span class="text-sm text-muted">0:00 — 0:10</span>
+                        <span class="ml-auto text-xs font-mono bg-white/5 px-3 py-1 rounded-full text-accent">10 min</span>
+                    </div>
+                </div>
+                <div class="md:col-span-9 p-8 md:p-12 space-y-6">
+                    <p class="text-muted">Criar conexao, alinhar expectativas e apresentar a turma.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass-card rounded-lg p-5">
+                            <span class="text-xs font-mono text-accent">0:00 — 0:03</span>
+                            <h4 class="font-semibold mt-2">Boas-vindas</h4>
+                            <p class="text-sm text-muted mt-2">Apresentacao do facilitador, objetivos da reuniao e o que cada um vai sair sabendo.</p>
+                        </div>
+                        <div class="glass-card rounded-lg p-5">
+                            <span class="text-xs font-mono text-accent">0:03 — 0:07</span>
+                            <h4 class="font-semibold mt-2">Rodada Relampago</h4>
+                            <p class="text-sm text-muted mt-2">Cada escritorio se apresenta em 30s: nome, cidade, equipe e maior dor em processos.</p>
+                        </div>
+                        <div class="glass-card rounded-lg p-5">
+                            <span class="text-xs font-mono text-accent">0:07 — 0:10</span>
+                            <h4 class="font-semibold mt-2">Regras da Reuniao</h4>
+                            <p class="text-sm text-muted mt-2">Camera ligada, perguntas no chat, microfone mute. "Nao existe pergunta boba."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco 2 -->
+            <div class="border-t border-white/10 grid grid-cols-1 md:grid-cols-12 reveal">
+                <div class="md:col-span-3 p-8 md:p-12 border-b md:border-b-0 md:border-r border-white/10 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-mono text-accent tracking-widest">BLOCO 02</span>
+                        <h3 class="text-2xl font-bold tracking-tight mt-2">Visao do Produto</h3>
+                    </div>
+                    <div class="mt-6 flex items-center gap-3">
+                        <iconify-icon class="text-xl text-muted" icon="solar:clock-circle-linear"></iconify-icon>
+                        <span class="text-sm text-muted">0:10 — 0:20</span>
+                        <span class="ml-auto text-xs font-mono bg-white/5 px-3 py-1 rounded-full text-accent">10 min</span>
+                    </div>
+                </div>
+                <div class="md:col-span-9 p-8 md:p-12 space-y-6">
+                    <p class="text-muted">Entender o que o Onety resolve e como a implantacao funciona.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass-card rounded-lg p-5">
+                            <span class="text-xs font-mono text-danger">A DOR</span>
+                            <ul class="mt-3 space-y-2 text-sm text-muted">
+                                <li class="flex items-start gap-2"><iconify-icon class="text-danger mt-0.5" icon="solar:close-circle-bold"></iconify-icon> Planilhas que ninguem atualiza</li>
+                                <li class="flex items-start gap-2"><iconify-icon class="text-danger mt-0.5" icon="solar:close-circle-bold"></iconify-icon> Prazos vencendo sem aviso</li>
+                                <li class="flex items-start gap-2"><iconify-icon class="text-danger mt-0.5" icon="solar:close-circle-bold"></iconify-icon> WhatsApp como ferramenta de gestao</li>
+                                <li class="flex items-start gap-2"><iconify-icon class="text-danger mt-0.5" icon="solar:close-circle-bold"></iconify-icon> Retrabalho por etapas esquecidas</li>
+                            </ul>
+                        </div>
+                        <div class="glass-card rounded-lg p-5">
+                            <span class="text-xs font-mono text-success">A SOLUCAO</span>
+                            <ul class="mt-3 space-y-2 text-sm text-muted">
+                                <li class="flex items-start gap-2"><iconify-icon class="text-success mt-0.5" icon="solar:check-circle-bold"></iconify-icon> Processos com SLA automatico</li>
+                                <li class="flex items-start gap-2"><iconify-icon class="text-success mt-0.5" icon="solar:check-circle-bold"></iconify-icon> Notificacoes de abertura e conclusao</li>
+                                <li class="flex items-start gap-2"><iconify-icon class="text-success mt-0.5" icon="solar:check-circle-bold"></iconify-icon> Departamentos e responsaveis claros</li>
+                                <li class="flex items-start gap-2"><iconify-icon class="text-success mt-0.5" icon="solar:check-circle-bold"></iconify-icon> Integracoes: eContador, Onvio, SERPRO</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Timeline das 5 fases -->
+                    <div class="mt-6">
+                        <span class="text-xs font-mono text-accent mb-4 block">JORNADA DE IMPLANTACAO — 5 FASES</span>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="flex-1 min-w-[140px] bg-accent/10 border border-accent/20 rounded-lg p-4 text-center">
+                                <span class="text-xs font-mono text-accent block">DIA 0</span>
+                                <span class="text-sm font-bold block mt-1">Discovery</span>
+                                <span class="text-xs text-muted">Kickoff + Goals</span>
+                                <div class="mt-2 text-xs bg-accent text-white rounded px-2 py-0.5 inline-block">HOJE</div>
+                            </div>
+                            <div class="flex-1 min-w-[140px] bg-white/5 border border-white/10 rounded-lg p-4 text-center">
+                                <span class="text-xs font-mono text-muted block">DIA 1</span>
+                                <span class="text-sm font-bold block mt-1">Design</span>
+                                <span class="text-xs text-muted">Config + Plan</span>
+                            </div>
+                            <div class="flex-1 min-w-[140px] bg-white/5 border border-white/10 rounded-lg p-4 text-center">
+                                <span class="text-xs font-mono text-muted block">DIAS 2-4</span>
+                                <span class="text-sm font-bold block mt-1">Build</span>
+                                <span class="text-xs text-muted">Setup + Treino</span>
+                            </div>
+                            <div class="flex-1 min-w-[140px] bg-white/5 border border-white/10 rounded-lg p-4 text-center">
+                                <span class="text-xs font-mono text-muted block">DIAS 5-7</span>
+                                <span class="text-sm font-bold block mt-1">Launch</span>
+                                <span class="text-xs text-muted">Go-Live</span>
+                            </div>
+                            <div class="flex-1 min-w-[140px] bg-white/5 border border-white/10 rounded-lg p-4 text-center">
+                                <span class="text-xs font-mono text-muted block">D+7 a D+90</span>
+                                <span class="text-sm font-bold block mt-1">Adoption</span>
+                                <span class="text-xs text-muted">Metricas + QBR</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco 3 -->
+            <div class="border-t border-white/10 grid grid-cols-1 md:grid-cols-12 reveal">
+                <div class="md:col-span-3 p-8 md:p-12 border-b md:border-b-0 md:border-r border-white/10 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-mono text-accent tracking-widest">BLOCO 03</span>
+                        <h3 class="text-2xl font-bold tracking-tight mt-2">Demo ao Vivo</h3>
+                    </div>
+                    <div class="mt-6 flex items-center gap-3">
+                        <iconify-icon class="text-xl text-muted" icon="solar:clock-circle-linear"></iconify-icon>
+                        <span class="text-sm text-muted">0:20 — 0:35</span>
+                        <span class="ml-auto text-xs font-mono bg-white/5 px-3 py-1 rounded-full text-warning">15 min</span>
+                    </div>
+                </div>
+                <div class="md:col-span-9 p-8 md:p-12 space-y-6">
+                    <p class="text-muted">Mostrar o produto funcionando. Nada de slide — tela real.</p>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-4 bg-white/5 rounded-lg p-4">
+                            <span class="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-mono text-sm font-bold">1</span>
+                            <span class="text-sm">Clicar em <strong>"Novo Processo"</strong></span>
+                            <span class="ml-auto text-xs text-muted">Formulario limpo</span>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white/5 rounded-lg p-4">
+                            <span class="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-mono text-sm font-bold">2</span>
+                            <span class="text-sm">Nome: <strong>"Apuracao de Impostos — Janeiro"</strong></span>
+                            <span class="ml-auto text-xs text-muted">Campo nome</span>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white/5 rounded-lg p-4">
+                            <span class="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-mono text-sm font-bold">3</span>
+                            <span class="text-sm">Departamento: <strong>Fiscal</strong> | Responsavel: <strong>Maria</strong></span>
+                            <span class="ml-auto text-xs text-muted">Dropdowns</span>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white/5 rounded-lg p-4">
+                            <span class="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center font-mono text-sm font-bold">4</span>
+                            <span class="text-sm">Meta: <strong>5 dias</strong> | Prazo: <strong>7 dias</strong></span>
+                            <span class="ml-auto text-xs text-muted">SLA</span>
+                        </div>
+                        <div class="flex items-center gap-4 bg-accent/10 border border-accent/20 rounded-lg p-4">
+                            <span class="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-mono text-sm font-bold">5</span>
+                            <span class="text-sm font-semibold">Salvar — Processo aparece na lista</span>
+                            <span class="ml-auto text-xs text-accent">30 segundos</span>
+                        </div>
+                    </div>
+                    <div class="script-block rounded-lg p-5 mt-4">
+                        <span class="text-xs font-mono text-accent block mb-2">SCRIPT DO FACILITADOR</span>
+                        <p class="text-sm text-muted italic">"Pronto. Em 30 segundos voces tem um processo com prazo, responsavel e notificacao automatica. Quantos minutos voces gastam fazendo isso em planilha?"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco 4 -->
+            <div class="border-t border-white/10 grid grid-cols-1 md:grid-cols-12 reveal">
+                <div class="md:col-span-3 p-8 md:p-12 border-b md:border-b-0 md:border-r border-white/10 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-mono text-accent tracking-widest">BLOCO 04</span>
+                        <h3 class="text-2xl font-bold tracking-tight mt-2">Hands-On Guiado</h3>
+                    </div>
+                    <div class="mt-6 flex items-center gap-3">
+                        <iconify-icon class="text-xl text-muted" icon="solar:clock-circle-linear"></iconify-icon>
+                        <span class="text-sm text-muted">0:35 — 0:50</span>
+                        <span class="ml-auto text-xs font-mono bg-white/5 px-3 py-1 rounded-full text-success">15 min</span>
+                    </div>
+                </div>
+                <div class="md:col-span-9 p-8 md:p-12 space-y-6">
+                    <p class="text-muted">Cada participante FAZ, nao so assiste. <strong class="text-white">Meta: 100% criam pelo menos 1 processo.</strong></p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass-card rounded-lg p-5">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="w-7 h-7 rounded-full bg-success/20 text-success flex items-center justify-center font-mono text-xs font-bold">1</span>
+                                <span class="font-semibold text-sm">Login + Navegar ate Processos</span>
+                            </div>
+                            <p class="text-xs text-muted">2 min — "Levante a mao quando estiver la"</p>
+                        </div>
+                        <div class="glass-card rounded-lg p-5">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="w-7 h-7 rounded-full bg-success/20 text-success flex items-center justify-center font-mono text-xs font-bold">2</span>
+                                <span class="font-semibold text-sm">Criar processo com SLA</span>
+                            </div>
+                            <p class="text-xs text-muted">5 min — "Cole o nome do processo no chat"</p>
+                        </div>
+                        <div class="glass-card rounded-lg p-5">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="w-7 h-7 rounded-full bg-success/20 text-success flex items-center justify-center font-mono text-xs font-bold">3</span>
+                                <span class="font-semibold text-sm">Adicionar sub-processo</span>
+                            </div>
+                            <p class="text-xs text-muted">3 min — "Quem conseguiu? Reacao no chat"</p>
+                        </div>
+                        <div class="glass-card rounded-lg p-5">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="w-7 h-7 rounded-full bg-success/20 text-success flex items-center justify-center font-mono text-xs font-bold">4</span>
+                                <span class="font-semibold text-sm">Visualizar com filtros</span>
+                            </div>
+                            <p class="text-xs text-muted">1 min — Demonstrar filtros ao vivo</p>
+                        </div>
+                    </div>
+                    <div class="script-block rounded-lg p-5">
+                        <span class="text-xs font-mono text-accent block mb-2">SCRIPT — CELEBRACAO</span>
+                        <p class="text-sm text-muted italic">"Parabens! Voces acabaram de criar o primeiro processo no Onety. Isso que voces fizeram em 10 minutos substitui planilhas, WhatsApp e post-its. A partir de agora, e so escalar."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco 5 -->
+            <div class="border-t border-white/10 grid grid-cols-1 md:grid-cols-12 reveal">
+                <div class="md:col-span-3 p-8 md:p-12 border-b md:border-b-0 md:border-r border-white/10 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-mono text-accent tracking-widest">BLOCO 05</span>
+                        <h3 class="text-2xl font-bold tracking-tight mt-2">Plano de Acao</h3>
+                    </div>
+                    <div class="mt-6 flex items-center gap-3">
+                        <iconify-icon class="text-xl text-muted" icon="solar:clock-circle-linear"></iconify-icon>
+                        <span class="text-sm text-muted">0:50 — 1:00</span>
+                        <span class="ml-auto text-xs font-mono bg-white/5 px-3 py-1 rounded-full text-info">10 min</span>
+                    </div>
+                </div>
+                <div class="md:col-span-9 p-8 md:p-12 space-y-6">
+                    <p class="text-muted">Ninguem sai sem saber exatamente o proximo passo.</p>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-4 bg-white/5 rounded-lg p-4 border-l-4 border-accent">
+                            <span class="font-mono text-accent font-bold">01</span>
+                            <div>
+                                <span class="text-sm font-semibold">Nomear 1-2 Champions</span>
+                                <span class="text-xs text-muted block">Hoje — Socio/Gerente</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white/5 rounded-lg p-4 border-l-4 border-accent">
+                            <span class="font-mono text-accent font-bold">02</span>
+                            <div>
+                                <span class="text-sm font-semibold">Criar +3 processos reais</span>
+                                <span class="text-xs text-muted block">Ate amanha — Champion</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white/5 rounded-lg p-4 border-l-4 border-accent">
+                            <span class="font-mono text-accent font-bold">03</span>
+                            <div>
+                                <span class="text-sm font-semibold">Listar departamentos e usuarios</span>
+                                <span class="text-xs text-muted block">Ate amanha — Gerente</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white/5 rounded-lg p-4 border-l-4 border-accent">
+                            <span class="font-mono text-accent font-bold">04</span>
+                            <div>
+                                <span class="text-sm font-semibold">Agendar sessao 1:1 com CS</span>
+                                <span class="text-xs text-muted block">Ate amanha — Socio</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-accent/10 border border-accent/20 rounded-lg p-4 border-l-4 border-accent">
+                            <span class="font-mono text-accent font-bold">05</span>
+                            <div>
+                                <span class="text-sm font-semibold">Entrar no grupo WhatsApp "Turma 3"</span>
+                                <span class="text-xs text-accent block">AGORA</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCRIPTS DO FACILITADOR -->
+        <section id="scripts" class="border-b border-white/10 p-8 md:p-16">
+            <span class="section-label block mb-2 reveal">Scripts Prontos</span>
+            <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-10 reveal delay-100">Falas do <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accentLight">Facilitador</span></h2>
+
+            <div class="space-y-6">
+                <div class="script-block rounded-xl p-6 reveal delay-200">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-mono bg-accent/20 text-accent px-3 py-1 rounded-full">ABERTURA</span>
+                    </div>
+                    <p class="text-muted leading-relaxed">"Sejam bem-vindos a Turma 3 do Onety! Voces fazem parte de um grupo de escritorios que estao dando um passo importante: sair do controle manual para uma gestao profissional de processos. Nos proximos 60 minutos, voces vao entender como o Onety funciona, ver o produto ao vivo, criar o primeiro processo com as proprias maos e sair com um plano claro dos proximos 7 dias. <strong class="text-white">Ninguem sai dessa reuniao sem ter feito login e criado algo real.</strong>"</p>
+                </div>
+
+                <div class="script-block rounded-xl p-6 reveal delay-300">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-mono bg-warning/20 text-warning px-3 py-1 rounded-full">POS-DEMO</span>
+                    </div>
+                    <p class="text-muted leading-relaxed">"Pronto. Em 30 segundos voces tem um processo com prazo, responsavel e notificacao automatica. Quantos minutos voces gastam fazendo isso em planilha?"</p>
+                </div>
+
+                <div class="script-block rounded-xl p-6 reveal delay-400">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-xs font-mono bg-success/20 text-success px-3 py-1 rounded-full">ENCERRAMENTO</span>
+                    </div>
+                    <p class="text-muted leading-relaxed">"Voces sao a Turma 3 do Onety. Daqui a 7 dias, voces vao estar rodando processos com SLA, notificacoes automaticas e integracao com seus sistemas. Lembrem: qualquer duvida, WhatsApp. Nao existe duvida boba. <strong class="text-white">Missao #1: criem 3 processos reais ate amanha e mandem print no grupo!</strong>"</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHECKLIST DO FACILITADOR -->
+        <section id="checklist" class="border-b border-white/10 p-8 md:p-16">
+            <span class="section-label block mb-2 reveal">Checklist Interativo</span>
+            <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-10 reveal delay-100">Facilitador</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Antes -->
+                <div class="glass-card rounded-xl p-6 reveal delay-200">
+                    <div class="flex items-center gap-3 mb-6">
+                        <iconify-icon class="text-2xl text-warning" icon="solar:alarm-bold-duotone"></iconify-icon>
+                        <h3 class="font-bold text-lg">Antes</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Slide deck pronto (max 15 slides)</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Ambiente demo configurado</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Grupo WhatsApp criado</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Logins provisionados e testados</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Co-facilitador briefed</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Gravacao configurada</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Link 1:1 pronto (Calendly)</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Guia Rapido PDF pronto</span></label>
+                    </div>
+                </div>
+                <!-- Durante -->
+                <div class="glass-card rounded-xl p-6 reveal delay-300">
+                    <div class="flex items-center gap-3 mb-6">
+                        <iconify-icon class="text-2xl text-accent" icon="solar:play-bold-duotone"></iconify-icon>
+                        <h3 class="font-bold text-lg">Durante</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Camera e audio OK</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Anotar dores da rodada relampago</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Monitorar chat constantemente</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Pausar em cada etapa hands-on</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Coletar metricas de conclusao</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Confirmar TODOS fizeram login</span></label>
+                    </div>
+                </div>
+                <!-- Depois -->
+                <div class="glass-card rounded-xl p-6 reveal delay-400">
+                    <div class="flex items-center gap-3 mb-6">
+                        <iconify-icon class="text-2xl text-success" icon="solar:check-circle-bold-duotone"></iconify-icon>
+                        <h3 class="font-bold text-lg">Depois</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Recap enviado no WhatsApp (30 min)</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Gravacao compartilhada</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Metricas registradas</span></label>
+                        <label class="checklist-item flex items-center gap-3 cursor-pointer"><input type="checkbox"/><span class="text-sm text-muted">Follow-up quem nao agendou 1:1</span></label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- METRICAS -->
+        <section id="metricas" class="border-b border-white/10 p-8 md:p-16">
+            <span class="section-label block mb-2 reveal">Indicadores de Sucesso</span>
+            <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-10 reveal delay-100">Metricas</h2>
+
+            <div class="overflow-x-auto reveal delay-200">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-white/10">
+                            <th class="text-left py-4 px-4 font-mono text-xs text-muted uppercase tracking-widest">Indicador</th>
+                            <th class="text-center py-4 px-4 font-mono text-xs text-warning uppercase tracking-widest">Alerta</th>
+                            <th class="text-center py-4 px-4 font-mono text-xs text-accent uppercase tracking-widest">Bom</th>
+                            <th class="text-center py-4 px-4 font-mono text-xs text-success uppercase tracking-widest">Otimo</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-4 px-4 font-medium">Presenca</td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-danger/20 text-danger px-2 py-1 rounded">&lt; 60%</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-accent/20 text-accent px-2 py-1 rounded">&gt; 70%</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-success/20 text-success px-2 py-1 rounded">&gt; 90%</span></td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-4 px-4 font-medium">Login durante reuniao</td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-danger/20 text-danger px-2 py-1 rounded">&lt; 70%</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-accent/20 text-accent px-2 py-1 rounded">&gt; 80%</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-success/20 text-success px-2 py-1 rounded">100%</span></td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-4 px-4 font-medium">Processo criado no hands-on</td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-danger/20 text-danger px-2 py-1 rounded">&lt; 60%</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-accent/20 text-accent px-2 py-1 rounded">&gt; 80%</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-success/20 text-success px-2 py-1 rounded">100%</span></td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-4 px-4 font-medium">1:1 agendada em 24h</td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-danger/20 text-danger px-2 py-1 rounded">&lt; 40%</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-accent/20 text-accent px-2 py-1 rounded">&gt; 60%</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-success/20 text-success px-2 py-1 rounded">&gt; 80%</span></td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-4 px-4 font-medium">Processos criados em 48h</td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-danger/20 text-danger px-2 py-1 rounded">0</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-accent/20 text-accent px-2 py-1 rounded">&gt; 2/esc</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-success/20 text-success px-2 py-1 rounded">&gt; 3/esc</span></td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-4 px-4 font-medium">NPS do kickoff (D+1)</td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-danger/20 text-danger px-2 py-1 rounded">&lt; 20</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-accent/20 text-accent px-2 py-1 rounded">&gt; 40</span></td>
+                            <td class="py-4 px-4 text-center"><span class="text-xs bg-success/20 text-success px-2 py-1 rounded">&gt; 60</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TEMPLATES -->
+        <section id="templates" class="border-b border-white/10 p-8 md:p-16">
+            <span class="section-label block mb-2 reveal">Templates Prontos</span>
+            <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-10 reveal delay-100">Copie e <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accentLight">Use</span></h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Lembrete -->
+                <div class="glass-card rounded-xl p-6 reveal delay-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold">Lembrete (24h antes)</h3>
+                        <button onclick="copyTemplate('lembrete')" class="text-xs font-mono text-accent hover:text-accentLight transition-colors flex items-center gap-1">
+                            <iconify-icon icon="solar:copy-bold-duotone"></iconify-icon> Copiar
+                        </button>
+                    </div>
+                    <pre id="lembrete" class="text-xs text-muted bg-black/30 rounded-lg p-4 overflow-x-auto whitespace-pre-wrap font-mono leading-relaxed">Onety — Kickoff Turma 3 | Amanha as [horario]
+
+Ola [Nome],
+
+Amanha e o kickoff de implantacao do Onety!
+
+Horario: [horario]
+Link: [link da reuniao]
+Duracao: 1 hora
+
+Pedimos que tragam:
+- Notebook/computador com acesso a internet
+- Lista dos departamentos do escritorio
+- Nome de 1-2 pessoas que serao os "champions" internos
+
+Ate amanha!
+Equipe Onety</pre>
+                </div>
+
+                <!-- Recap -->
+                <div class="glass-card rounded-xl p-6 reveal delay-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold">Recap (pos-reuniao)</h3>
+                        <button onclick="copyTemplate('recap')" class="text-xs font-mono text-accent hover:text-accentLight transition-colors flex items-center gap-1">
+                            <iconify-icon icon="solar:copy-bold-duotone"></iconify-icon> Copiar
+                        </button>
+                    </div>
+                    <pre id="recap" class="text-xs text-muted bg-black/30 rounded-lg p-4 overflow-x-auto whitespace-pre-wrap font-mono leading-relaxed">Onety — Turma 3 | Recap do Kickoff
+
+Oi pessoal! Resumo do que vimos hoje:
+
+- O que e o Onety e o modulo de Processos
+- Como criar processos com SLA e notificacoes
+- Cada um criou seu primeiro processo!
+
+Missao ate amanha:
+1. Nomear Champions do escritorio
+2. Criar +3 processos reais
+3. Listar departamentos e usuarios
+4. Agendar sessao 1:1: [link calendly]
+
+Materiais:
+- Gravacao: [link]
+- Guia Rapido: [link PDF]
+- FAQ: [link knowledge base]
+
+Duvidas? Manda aqui no grupo ou me chama no privado!
+
+Bora, Turma 3!
+— [Nome do CS]</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="border-b border-white/10 p-8 md:p-16">
+            <span class="section-label block mb-2 reveal">Perguntas Frequentes</span>
+            <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-10 reveal delay-100">FAQ</h2>
+
+            <div class="space-y-3 max-w-3xl">
+                <details class="glass-card rounded-xl group reveal delay-200">
+                    <summary class="p-5 cursor-pointer flex items-center justify-between font-semibold text-sm">
+                        "Posso adicionar mais usuarios?"
+                        <iconify-icon class="text-muted group-open:rotate-180 transition-transform" icon="solar:alt-arrow-down-linear"></iconify-icon>
+                    </summary>
+                    <p class="px-5 pb-5 text-sm text-muted">Sim! Na sessao 1:1 configuramos todos os acessos.</p>
+                </details>
+                <details class="glass-card rounded-xl group reveal delay-300">
+                    <summary class="p-5 cursor-pointer flex items-center justify-between font-semibold text-sm">
+                        "E se eu errar um processo?"
+                        <iconify-icon class="text-muted group-open:rotate-180 transition-transform" icon="solar:alt-arrow-down-linear"></iconify-icon>
+                    </summary>
+                    <p class="px-5 pb-5 text-sm text-muted">Pode editar ou excluir a qualquer momento. Sem medo.</p>
+                </details>
+                <details class="glass-card rounded-xl group reveal delay-400">
+                    <summary class="p-5 cursor-pointer flex items-center justify-between font-semibold text-sm">
+                        "Quanto tempo ate integrar com eContador?"
+                        <iconify-icon class="text-muted group-open:rotate-180 transition-transform" icon="solar:alt-arrow-down-linear"></iconify-icon>
+                    </summary>
+                    <p class="px-5 pb-5 text-sm text-muted">Na Fase 3 (dias 2-4) o CS configura a integracao com voces.</p>
+                </details>
+                <details class="glass-card rounded-xl group reveal delay-500">
+                    <summary class="p-5 cursor-pointer flex items-center justify-between font-semibold text-sm">
+                        "E os outros modulos?"
+                        <iconify-icon class="text-muted group-open:rotate-180 transition-transform" icon="solar:alt-arrow-down-linear"></iconify-icon>
+                    </summary>
+                    <p class="px-5 pb-5 text-sm text-muted">Primeiro dominamos Processos. Em 30 dias expandimos para Obrigacoes, Financeiro e Legalizacao.</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="p-8 md:p-16 text-center">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <iconify-icon class="text-2xl text-accent" icon="solar:rocket-bold-duotone"></iconify-icon>
+                <span class="font-bold tracking-tighter text-xl">ONETY</span>
+            </div>
+            <p class="text-xs font-mono text-muted uppercase tracking-widest">Framework de Kickoff v1.0 | Turma 3 | Modulo de Processos</p>
+            <p class="text-xs text-muted mt-2">Baseado em SaaS Implementation Lifecycle (SIL) — Jason Lemkin</p>
+        </footer>
+
+    </div>
+
+    <!-- Reveal Animation Script -->
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Text reveal on load
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.text-reveal-content').forEach(el => {
+                el.closest('.text-reveal-wrapper')?.classList.add('reveal-active');
+            });
+            document.querySelectorAll('.reveal').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight) {
+                    el.classList.add('active');
+                }
+            });
+        });
+
+        // Copy template
+        function copyTemplate(id) {
+            const text = document.getElementById(id).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target.closest('button');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon> Copiado!';
+                btn.classList.add('text-success');
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.classList.remove('text-success');
+                }, 2000);
+            });
+        }
+    </script>
+
+</body>
+</html>
